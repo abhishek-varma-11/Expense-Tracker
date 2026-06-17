@@ -44,7 +44,9 @@ body{
 .addExpenseForm > label,
 .addExpenseForm > input{
     margin: 3px;
+    padding: 10px;
     width: 80%;
+    font-family: "Chelsea Market", system-ui;
 }
 
 .addExpenseForm > input{
@@ -87,5 +89,5 @@ body{
 thead,
 td{
     text-align: center;
-    padding: 10px 5vw;
+    padding: 3px 5vw;
 }
