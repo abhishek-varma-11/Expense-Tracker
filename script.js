@@ -5,6 +5,11 @@ const totalContainer = document.getElementById("totalContainer");
 
 let savedExpenses = localStorage.getItem("expenses");
 let expenses = JSON.parse(savedExpenses) || [];
+let nextId =
+    expenses.length > 0
+        ? Math.max(...expenses.map(expense => expense.id)) + 1
+        : 1;
+let editingExpenseId = null;
 
 addExpenseForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -12,24 +17,30 @@ addExpenseForm.addEventListener("submit", (event) => {
     const name = expenseName.value.trim();
     const amount = Number(expenseAmount.value);
 
-    let nextId =
-        expenses.length > 0
-            ? Math.max(...expenses.map(expense => expense.id)) + 1
-            : 1;
-    let expenseId = nextId;
-
-    if (name.length === 0 || Number.isNaN(amount) || amount <= 0) {
-        alert("Invalid Data");
-        return;
+    
+    if (editingExpenseId === null) {
+        let expenseId = nextId;
+        if (name.length === 0 || Number.isNaN(amount) || amount <= 0) {
+            alert("Invalid Data");
+            return;
+        }
+        else {
+            expenses.push({
+                id: expenseId,
+                name: name,
+                amount: amount
+            });
+            nextId++;
+            console.log(expenses);
+        }
     }
     else {
-        expenses.push({
-            id: expenseId,
-            name: name,
-            amount: amount
+        let expense = expenses.find(expense => {
+            return expense.id === editingExpenseId;
         });
-        nextId += 1;
-        console.log(expenses);
+        expense.name = name;
+        expense.amount = amount;
+        editingExpenseId = null;
     }
 
     saveExpsenses();
@@ -44,7 +55,7 @@ addExpenseForm.addEventListener("submit", (event) => {
 function updateTotal() {
 
     let total = expenses.reduce((sum, expense) => {
-        sum += expense.Amount;
+        sum += expense.amount;
         return sum;
     }, 0);
 
@@ -67,13 +78,15 @@ function renderExpenses() {
         const id = document.createElement("td");
         const nameCell = document.createElement("td");
         const amountCell = document.createElement("td");
-        const deleteCell = document.createElement("td");
+        const deleteEditCell = document.createElement("td");
         const deleteBtn = document.createElement("button");
+        const editBtn = document.createElement("button");
 
         id.textContent = expense.id;
-        nameCell.textContent = expense.Name;
-        amountCell.textContent = expense.Amount;
+        nameCell.textContent = expense.name;
+        amountCell.textContent = expense.amount;
         deleteBtn.textContent = "Delete";
+        editBtn.textContent = "Edit";
 
         deleteBtn.addEventListener("click", () => {
             expenses = expenses.filter((currentExpense) => {
@@ -85,13 +98,20 @@ function renderExpenses() {
             updateTotal();
         });
 
+        editBtn.addEventListener("click", () => {
+            expenseName.value = expense.name;
+            expenseAmount.value = expense.amount;
+            editingExpenseId = expense.id;
+            console.log(editingExpenseId);
+        });
+
         row.appendChild(id);
         row.appendChild(nameCell);
         row.appendChild(amountCell);
-        deleteCell.appendChild(deleteBtn);
-        row.appendChild(deleteCell);
+        deleteEditCell.appendChild(editBtn);
+        deleteEditCell.appendChild(deleteBtn);
+        row.appendChild(deleteEditCell);
         expenseList.appendChild(row);
-
     });
 }
 
